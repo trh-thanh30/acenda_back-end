@@ -12,7 +12,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RegisterDto } from '../auth/dto/register.dto';
-import { CodeDto } from '../auth/dto/code.dto';
+import { ChangePasswordDto, CodeDto } from '../auth/dto/code.dto';
 import { User, userStatus } from './entities/user.entity';
 import { hashPassword } from 'src/helpers/utils';
 import * as dayjs from 'dayjs';
@@ -141,7 +141,13 @@ export class UsersService {
     });
 
     await this.userRepository.save(newUser);
-    await this.sendActivationMail(newUser.email, newUser.email, code);
+    await this.sendActivationMail(
+      newUser.email,
+      newUser.email,
+      code,
+      'Active your account',
+      'register',
+    );
     return this.buildResponse(
       newUser.id,
       'Register successfully',
@@ -186,6 +192,7 @@ export class UsersService {
       user.email,
       code,
       'Reactive your account',
+      'register',
     );
     return this.buildResponse(user.id, 'Resend code successfully');
   }
@@ -195,7 +202,67 @@ export class UsersService {
     if (!user) throw new BadRequestException('User not found');
     return user;
   }
+  async retryPassword(email: string) {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) throw new BadRequestException('User not found');
+    const { code, expiredAt } = this.generateActivationCode();
+    await this.userRepository.update(user.id, {
+      code_id: code,
+      code_expired: expiredAt,
+    });
+    await this.sendActivationMail(
+      user.email,
+      user.email,
+      code,
+      'Change your password account at Acenda',
+      'changePassword',
+    );
+    return this.buildResponse(
+      user.id,
+      'Send code to change password successfully',
+    );
+  }
+  async changePassword(changePasswordDto: ChangePasswordDto) {
+    if (changePasswordDto.password !== changePasswordDto.confirmPassword) {
+      throw new BadRequestException(
+        'Password and confirm password do not match',
+      );
+    }
+    const user = await this.userRepository.findOneBy({
+      id: changePasswordDto.id,
+    });
+    if (!user) throw new BadRequestException('User not found');
+    const isBeforeChecked = dayjs().isBefore(user?.code_expired);
+    if (!isBeforeChecked) {
+      throw new BadRequestException('Code is expired. Please try again!!');
+    }
+    if (user?.code_id !== changePasswordDto.code) {
+      throw new BadRequestException('Code is not valid. Please try again!!');
+    }
+    const hashedPassword = await hashPassword(changePasswordDto.password);
+    await this.userRepository.update(user.id, {
+      password: hashedPassword,
+    });
+    return this.buildResponse(
+      user.id,
+      'Change password successfully',
+      HttpStatus.CREATED,
+    );
+  }
   // ---------- PRIVATE HELPERS ----------
+
+  async updateUserToken(id: string, refreshToken: string) {
+    return await this.userRepository.update(id, {
+      refresh_token: refreshToken,
+    });
+  }
+  async findUserByToken(refreshToken: string) {
+    return await this.userRepository.findOne({
+      where: {
+        refresh_token: refreshToken,
+      },
+    });
+  }
   private setDefaultAvatar(gender: string): string {
     switch (gender) {
       case 'male':
@@ -210,7 +277,7 @@ export class UsersService {
   private generateActivationCode(): { code: string; expiredAt: Date } {
     return {
       code: nanoid(6),
-      expiredAt: dayjs().add(1, 'minute').toDate(),
+      expiredAt: dayjs().add(5, 'minute').toDate(),
     };
   }
 
@@ -218,12 +285,13 @@ export class UsersService {
     email: string,
     name: string,
     code: string,
-    subject = 'Activate your account',
+    subject: string,
+    template: string,
   ) {
     await this.mailerService.sendMail({
       to: email,
       subject,
-      template: 'register',
+      template: template,
       context: { name, activationCode: code },
     });
   }
