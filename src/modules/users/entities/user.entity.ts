@@ -59,6 +59,8 @@ export class User {
   @Column({ type: 'enum', enum: userStatus, default: userStatus.INACTIVE })
   user_status: userStatus;
   @Column({ nullable: true, default: false })
+  is_active: boolean;
+  @Column({ nullable: true, default: false })
   is_deleted: boolean;
   @DeleteDateColumn({
     type: 'timestamp',

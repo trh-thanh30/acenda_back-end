@@ -1,29 +1,35 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { hashPassword } from 'src/helpers/utils';
+import { MailerService } from '@nestjs-modules/mailer';
 import {
-  FilterOperator,
-  FilterSuffix,
+  PaginateQuery,
   paginate,
   Paginated,
-  PaginateQuery,
+  FilterOperator,
+  FilterSuffix,
 } from 'nestjs-paginate';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { RegisterDto } from '../auth/dto/register.dto';
+import { CodeDto } from '../auth/dto/code.dto';
+import { User, userStatus } from './entities/user.entity';
+import { hashPassword } from 'src/helpers/utils';
+import * as dayjs from 'dayjs';
+import { nanoid } from 'nanoid';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly mailerService: MailerService,
   ) {}
+
   async create(createUserDto: CreateUserDto) {
-    const exitUser = await this.userRepository.findOneBy({
+    const existingUser = await this.userRepository.findOneBy({
       email: createUserDto.email,
     });
-    if (exitUser) {
+    if (existingUser) {
       throw new BadRequestException('User already exists');
     }
 
@@ -31,23 +37,15 @@ export class UsersService {
     const newUser = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
+      avatar: this.setDefaultAvatar(createUserDto.gender),
     });
-    switch (newUser.gender) {
-      case 'male':
-        newUser.avatar =
-          'https://cdn.pixabay.com/photo/2016/03/31/19/10/avatar-1294776_1280.png';
-        break;
-      case 'female':
-        newUser.avatar =
-          'https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-female-9.png';
-        break;
-    }
+
     await this.userRepository.save(newUser);
-    return {
-      id: newUser.id,
-      message: 'User created successfully',
-      status: HttpStatus.CREATED,
-    };
+    return this.buildResponse(
+      newUser.id,
+      'User created successfully',
+      HttpStatus.CREATED,
+    );
   }
 
   findAll(query: PaginateQuery): Promise<Paginated<User>> {
@@ -79,66 +77,158 @@ export class UsersService {
 
   async findOne(id: string) {
     const user = await this.userRepository.findOneBy({ id });
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
+    if (!user) throw new BadRequestException('User not found');
     return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-    const exitEmail = await this.userRepository.findOneBy({
+    if (!user) throw new BadRequestException('User not found');
+
+    const existingEmail = await this.userRepository.findOneBy({
       email: updateUserDto.email,
     });
-    if (exitEmail) {
-      throw new BadRequestException('User already exists');
+    if (existingEmail && existingEmail.id !== id) {
+      throw new BadRequestException('Email already exists');
     }
+
     await this.userRepository.update(id, updateUserDto);
-    return {
-      id: user.id,
-      message: 'User updated successfully',
-      status: HttpStatus.OK,
-    };
+    return this.buildResponse(id, 'User updated successfully');
   }
 
   async remove(id: string) {
     const user = await this.userRepository.findOneBy({ id });
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
+    if (!user) throw new BadRequestException('User not found');
+
     await this.userRepository.update(user.id, {
       is_deleted: true,
       delete_at: new Date(),
     });
     await this.userRepository.softDelete(user.id);
-    return {
-      id: user.id,
-      message: 'User deleted successfully',
-      status: HttpStatus.OK,
-    };
+    return this.buildResponse(user.id, 'User deleted successfully');
   }
+
   async restoreUserSoft(id: string) {
     const user = await this.userRepository.findOne({
-      where: {
-        id,
-      },
+      where: { id },
       withDeleted: true,
     });
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-    await this.userRepository.restore(user.id);
+    if (!user) throw new BadRequestException('User not found');
+
+    await this.userRepository.restore(id);
     await this.userRepository.update(id, {
       is_deleted: false,
       delete_at: null,
     });
+    return this.buildResponse(user.id, 'User restored successfully');
+  }
+
+  async register(registerDto: RegisterDto) {
+    const existingUser = await this.userRepository.findOneBy({
+      email: registerDto.email,
+    });
+    if (existingUser) throw new BadRequestException('User already exists');
+
+    const hashedPassword = await hashPassword(registerDto.password);
+    const { code, expiredAt } = this.generateActivationCode();
+
+    const newUser = this.userRepository.create({
+      ...registerDto,
+      password: hashedPassword,
+      avatar: this.setDefaultAvatar(registerDto.gender),
+      code_id: code,
+      code_expired: expiredAt,
+    });
+
+    await this.userRepository.save(newUser);
+    await this.sendActivationMail(newUser.email, newUser.email, code);
+    return this.buildResponse(
+      newUser.id,
+      'Register successfully',
+      HttpStatus.CREATED,
+    );
+  }
+
+  async handleActiveAccount(code: CodeDto) {
+    const user = await this.userRepository.findOneBy({
+      code_id: code.code,
+      id: code.id,
+    });
+    if (!user) throw new BadRequestException('User not found');
+
+    if (!dayjs().isBefore(user.code_expired)) {
+      throw new BadRequestException('Code is expired. Please try again!!');
+    }
+    if (user.code_id !== code.code) {
+      throw new BadRequestException('Code is not valid. Please try again!!');
+    }
+    await this.userRepository.update(user.id, {
+      is_active: true,
+      user_status: userStatus.ACTIVE,
+    });
+
+    return this.buildResponse(user.id, 'Active account successfully');
+  }
+
+  async retryActive(email: string) {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) throw new BadRequestException('User not found');
+    if (user.is_active) throw new BadRequestException('User already active');
+
+    const { code, expiredAt } = this.generateActivationCode();
+    await this.userRepository.update(user.id, {
+      code_id: code,
+      code_expired: expiredAt,
+    });
+
+    await this.sendActivationMail(
+      user.email,
+      user.email,
+      code,
+      'Reactive your account',
+    );
+    return this.buildResponse(user.id, 'Resend code successfully');
+  }
+
+  async findByEmail(email: string) {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) throw new BadRequestException('User not found');
+    return user;
+  }
+  // ---------- PRIVATE HELPERS ----------
+  private setDefaultAvatar(gender: string): string {
+    switch (gender) {
+      case 'male':
+        return 'https://cdn.pixabay.com/photo/2016/03/31/19/10/avatar-1294776_1280.png';
+      case 'female':
+        return 'https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-female-9.png';
+      default:
+        return '';
+    }
+  }
+
+  private generateActivationCode(): { code: string; expiredAt: Date } {
     return {
-      id: user.id,
-      message: 'User restored successfully',
-      status: HttpStatus.OK,
+      code: nanoid(6),
+      expiredAt: dayjs().add(1, 'minute').toDate(),
     };
+  }
+
+  private async sendActivationMail(
+    email: string,
+    name: string,
+    code: string,
+    subject = 'Activate your account',
+  ) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject,
+      template: 'register',
+      context: { name, activationCode: code },
+    });
+  }
+
+  private buildResponse(id: string, message: string, status = HttpStatus.OK) {
+    return { id, message, status };
   }
 }

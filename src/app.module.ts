@@ -1,33 +1,30 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
-import { User } from './modules/users/entities/user.entity';
-
+import { DatabaseConfig } from './config/database.config';
+import { MailerConfig } from './config/mailer.config';
+import { AuthModule } from './modules/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('HOST_DB'),
-        port: configService.get<number>('PORT_DB'),
-        username: configService.get<string>('USERNAME_DB'),
-        password: configService.get<string>('PASSWORD_DB'),
-        database: configService.get<string>('DATABASE_NAME_DB'),
-        entities: [User],
-        synchronize: true,
-      }),
-      inject: [ConfigService],
-    }),
+    DatabaseConfig,
+    MailerConfig,
     UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Global guard for JWT authentication
+    },
+  ],
 })
 export class AppModule {}
