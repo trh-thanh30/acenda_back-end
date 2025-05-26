@@ -9,6 +9,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { UploadModule } from './modules/upload/upload.module';
+import { HotelModule } from './modules/hotel/hotel.module';
+import { AddressModule } from './modules/address/address.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { UploadModule } from './modules/upload/upload.module';
     UsersModule,
     AuthModule,
     UploadModule,
+    HotelModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [
