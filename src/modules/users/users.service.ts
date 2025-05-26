@@ -88,6 +88,7 @@ export class UsersService {
     const existingEmail = await this.userRepository.findOneBy({
       email: updateUserDto.email,
     });
+
     if (existingEmail && existingEmail.id !== id) {
       throw new BadRequestException('Email already exists');
     }
@@ -249,6 +250,7 @@ export class UsersService {
       HttpStatus.CREATED,
     );
   }
+
   // ---------- PRIVATE HELPERS ----------
 
   async updateUserToken(id: string, refreshToken: string) {
@@ -262,6 +264,11 @@ export class UsersService {
         refresh_token: refreshToken,
       },
     });
+  }
+  async updateAvatar(id: string, avatar: string) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) throw new BadRequestException('User not found');
+    await this.userRepository.update(user.id, { avatar });
   }
   private setDefaultAvatar(gender: string): string {
     switch (gender) {

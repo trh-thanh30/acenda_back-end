@@ -8,6 +8,8 @@ import { MailerConfig } from './config/mailer.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
+import { UploadModule } from './modules/upload/upload.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -17,6 +19,7 @@ import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
     MailerConfig,
     UsersModule,
     AuthModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
