@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Readable } from 'stream';
@@ -29,5 +29,22 @@ export class CloudinaryService {
 
       Readable.from(buffer).pipe(stream);
     });
+  }
+  async deleteFileByUrl(url: string) {
+    const publicId = this.extractPublicIdFromUrl(url);
+    const result = await cloudinary.uploader.destroy(publicId);
+    if (result.result !== 'ok') {
+      throw new BadRequestException(`Failed to delete file: ${result.result}`);
+    }
+    return result;
+  }
+  // Helper function to extract public ID from URL
+  private extractPublicIdFromUrl(url: string): string {
+    const regex = /\/upload\/(?:v\d+\/)?(.+?)\.(jpg|jpeg|png|webp|gif)$/;
+    const match = url.match(regex);
+    if (!match || !match[1]) {
+      throw new Error(`Invalid Cloudinary URL format: ${url}`);
+    }
+    return match[1]; // publicId (có folder nếu có)
   }
 }

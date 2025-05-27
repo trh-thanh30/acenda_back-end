@@ -18,8 +18,10 @@ export class CreateHotelDto {
   address: CreateAddressDto;
   @IsOptional()
   @IsArray({ message: 'Images must be an array' })
-  images?: string[];
-  @IsOptional()
+  images: string[];
+  @IsNotEmpty({
+    message: 'Amenities are required',
+  })
   @IsArray({ message: 'Amenities must be an array' })
-  amenities?: string[];
+  amenities: string[];
 }

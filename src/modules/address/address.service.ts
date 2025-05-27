@@ -77,10 +77,14 @@ export class AddressService {
         email: user.email,
       },
     });
-    return {
-      message: 'Address updated successfully',
-      status: HttpStatus.OK,
-    };
+    const updatedAddress = await this.addressRepository.findOne({
+      where: { id },
+      relations: ['hotel'],
+    });
+    if (!updatedAddress) {
+      throw new BadRequestException('Address not found after update');
+    }
+    return updatedAddress;
   }
 
   async remove(id: string, user: IUser) {
