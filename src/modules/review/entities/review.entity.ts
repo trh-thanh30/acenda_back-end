@@ -1,6 +1,4 @@
-import { Address } from 'src/modules/address/entities/address.entity';
-import { Review } from 'src/modules/review/entities/review.entity';
-import { Room } from 'src/modules/room/entities/room.entity';
+import { Hotel } from 'src/modules/hotel/entities/hotel.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   BeforeInsert,
@@ -9,34 +7,32 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { uuidv7 } from 'uuidv7';
-@Entity('hotels')
-export class Hotel {
+
+@Entity('reviews')
+export class Review {
   @PrimaryGeneratedColumn('uuid')
   id: string;
   @BeforeInsert()
   generateId() {
     this.id = uuidv7();
   }
-  @Column({ unique: true })
-  name: string;
   @Column()
-  description: string;
-  @Column('simple-array', { nullable: true })
-  amenities: string[];
-  @Column('simple-array', { nullable: true })
-  images: string[];
-  @OneToOne(() => Address, { cascade: true })
-  @JoinColumn({ name: 'address_id' })
-  address: Address;
-  @OneToMany(() => Room, (room) => room.hotel)
-  rooms: Room[];
-  @OneToMany(() => Review, (review) => review.hotel)
-  reviews: Review[];
+  rating: number;
+  @Column()
+  title: string;
+  @Column('longtext')
+  comment: string;
+
+  @ManyToOne(() => Hotel, (hotel) => hotel.reviews, { nullable: true })
+  @JoinColumn({ name: 'hotel_id' })
+  hotel: Hotel;
+
+  //   @ManyToOne(() => Room, (hotel) => hotel.review, { nullable: true })
+  //   @JoinColumn({ name: 'room_id' })
+  //   room: Room;
   @ManyToOne(() => User)
   @JoinColumn({ name: 'created_by' })
   created_by: User;

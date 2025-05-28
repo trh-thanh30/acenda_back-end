@@ -77,7 +77,7 @@ export class HotelService {
         'created_at',
         'updated_at',
       ],
-      relations: ['address', 'rooms'],
+      relations: ['address', 'rooms', 'reviews'],
       filterableColumns: {
         name: [FilterOperator.EQ, FilterSuffix.NOT],
       },
@@ -87,7 +87,7 @@ export class HotelService {
   async findOne(id: string) {
     const hotel = await this.hotelRepository.findOne({
       where: { id },
-      relations: ['address', 'rooms'],
+      relations: ['address', 'rooms', 'reviews'],
     });
     if (!hotel) {
       throw new BadRequestException(`Hotel with id ${id} not found`);

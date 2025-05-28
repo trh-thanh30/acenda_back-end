@@ -12,6 +12,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { HotelModule } from './modules/hotel/hotel.module';
 import { AddressModule } from './modules/address/address.module';
 import { RoomModule } from './modules/room/room.module';
+import { ReviewModule } from './modules/review/review.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RoomModule } from './modules/room/room.module';
     HotelModule,
     AddressModule,
     RoomModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [
