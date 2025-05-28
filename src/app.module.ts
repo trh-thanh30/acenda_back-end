@@ -11,6 +11,7 @@ import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { UploadModule } from './modules/upload/upload.module';
 import { HotelModule } from './modules/hotel/hotel.module';
 import { AddressModule } from './modules/address/address.module';
+import { RoomModule } from './modules/room/room.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AddressModule } from './modules/address/address.module';
     UploadModule,
     HotelModule,
     AddressModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [
