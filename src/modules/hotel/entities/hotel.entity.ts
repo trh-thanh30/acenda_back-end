@@ -1,4 +1,5 @@
 import { Address } from 'src/modules/address/entities/address.entity';
+import { Booking } from 'src/modules/booking/entities/booking.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
 import { Room } from 'src/modules/room/entities/room.entity';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -35,6 +36,8 @@ export class Hotel {
   address: Address;
   @OneToMany(() => Room, (room) => room.hotel)
   rooms: Room[];
+  @OneToMany(() => Booking, (booking) => booking.hotel)
+  bookings: Booking[];
   @OneToMany(() => Review, (review) => review.hotel)
   reviews: Review[];
   @ManyToOne(() => User)

@@ -1,4 +1,5 @@
 import { Hotel } from 'src/modules/hotel/entities/hotel.entity';
+import { Room } from 'src/modules/room/entities/room.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   BeforeInsert,
@@ -29,10 +30,9 @@ export class Review {
   @ManyToOne(() => Hotel, (hotel) => hotel.reviews, { nullable: true })
   @JoinColumn({ name: 'hotel_id' })
   hotel: Hotel;
-
-  //   @ManyToOne(() => Room, (hotel) => hotel.review, { nullable: true })
-  //   @JoinColumn({ name: 'room_id' })
-  //   room: Room;
+  @ManyToOne(() => Room, (hotel) => hotel.reviews, { nullable: true })
+  @JoinColumn({ name: 'room_id' })
+  room: Room;
   @ManyToOne(() => User)
   @JoinColumn({ name: 'created_by' })
   created_by: User;

@@ -13,6 +13,7 @@ import { HotelModule } from './modules/hotel/hotel.module';
 import { AddressModule } from './modules/address/address.module';
 import { RoomModule } from './modules/room/room.module';
 import { ReviewModule } from './modules/review/review.module';
+import { BookingModule } from './modules/booking/booking.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ReviewModule } from './modules/review/review.module';
     AddressModule,
     RoomModule,
     ReviewModule,
+    BookingModule,
   ],
   controllers: [AppController],
   providers: [

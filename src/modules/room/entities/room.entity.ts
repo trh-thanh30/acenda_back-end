@@ -1,4 +1,6 @@
+import { Booking } from 'src/modules/booking/entities/booking.entity';
 import { Hotel } from 'src/modules/hotel/entities/hotel.entity';
+import { Review } from 'src/modules/review/entities/review.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   BeforeInsert,
@@ -7,6 +9,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { uuidv7 } from 'uuidv7';
@@ -36,7 +39,8 @@ export class Room {
   @ManyToOne(() => Hotel, (hotel) => hotel.rooms)
   @JoinColumn({ name: 'hotel_id' })
   hotel: Hotel;
-
+  @Column({ default: 1 })
+  quantity: number;
   @ManyToOne(() => User)
   @JoinColumn({ name: 'created_by' })
   created_by: User;
@@ -64,4 +68,9 @@ export class Room {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date;
+  // more
+  @OneToMany(() => Booking, (booking) => booking.room)
+  bookings: Booking[];
+  @OneToMany(() => Review, (review) => review.room)
+  reviews: Review[];
 }

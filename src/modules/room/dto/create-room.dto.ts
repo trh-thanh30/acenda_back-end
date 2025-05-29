@@ -15,6 +15,10 @@ export class CreateRoomDto {
     message: 'Hotel id is required',
   })
   hotel_id: string;
+  @IsNotEmpty({
+    message: 'Room quantity is required',
+  })
+  quantity: number;
   @IsNotEmpty()
   description: string;
   @IsNotEmpty({

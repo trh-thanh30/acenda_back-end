@@ -1,8 +1,12 @@
+import { Booking } from 'src/modules/booking/entities/booking.entity';
+import { Hotel } from 'src/modules/hotel/entities/hotel.entity';
+import { Review } from 'src/modules/review/entities/review.entity';
 import {
   BeforeInsert,
   Column,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { uuidv7 } from 'uuidv7';
@@ -78,5 +82,12 @@ export class User {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date;
-  // created_by, updated_by, deleted_by
+
+  // More
+  @OneToMany(() => Hotel, (hotel) => hotel.created_by)
+  hotels: Hotel[];
+  @OneToMany(() => Review, (review) => review.created_by)
+  reviews: Review[];
+  @OneToMany(() => Booking, (booking) => booking.booking_by)
+  bookings: Booking[];
 }
