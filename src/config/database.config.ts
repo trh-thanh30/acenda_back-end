@@ -5,6 +5,7 @@ import { Booking } from 'src/modules/booking/entities/booking.entity';
 import { Hotel } from 'src/modules/hotel/entities/hotel.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
 import { Room } from 'src/modules/room/entities/room.entity';
+import { Tour } from 'src/modules/tour/entities/tour.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
 export const DatabaseConfig = TypeOrmModule.forRootAsync({
@@ -16,7 +17,7 @@ export const DatabaseConfig = TypeOrmModule.forRootAsync({
     username: configService.get<string>('USERNAME_DB'),
     password: configService.get<string>('PASSWORD_DB'),
     database: configService.get<string>('DATABASE_NAME_DB'),
-    entities: [User, Address, Hotel, Room, Review, Booking],
+    entities: [User, Address, Hotel, Room, Review, Booking, Tour],
     synchronize: true,
   }),
   inject: [ConfigService],

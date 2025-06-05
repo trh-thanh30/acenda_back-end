@@ -14,6 +14,8 @@ import { AddressModule } from './modules/address/address.module';
 import { RoomModule } from './modules/room/room.module';
 import { ReviewModule } from './modules/review/review.module';
 import { BookingModule } from './modules/booking/booking.module';
+import { TourModule } from './modules/tour/tour.module';
+import { TourBookingModule } from './modules/tour-booking/tour-booking.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { BookingModule } from './modules/booking/booking.module';
     RoomModule,
     ReviewModule,
     BookingModule,
+    TourModule,
+    TourBookingModule,
   ],
   controllers: [AppController],
   providers: [

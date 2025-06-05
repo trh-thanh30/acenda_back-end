@@ -102,7 +102,6 @@ export class HotelService {
     imagesToRemove: string[],
     newFiles: Express.Multer.File[],
   ) {
-    console.log(imagesToRemove);
     const hotel = await this.hotelRepository.findOne({
       where: { id },
       relations: ['address'],
