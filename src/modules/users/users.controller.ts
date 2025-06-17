@@ -12,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { User } from './entities/user.entity';
+import { Public } from 'src/decorator/customize';
 
 @Controller('users')
 export class UsersController {
@@ -40,6 +41,12 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Public()
+  @Post('/already-email')
+  alreadyEmail(@Body('email') email: string) {
+    return this.usersService.alreadyEmail(email);
   }
 
   @Patch('/restore/:id')

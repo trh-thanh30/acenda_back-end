@@ -306,4 +306,13 @@ export class UsersService {
   private buildResponse(id: string, message: string, status = HttpStatus.OK) {
     return { id, message, status };
   }
+
+  async alreadyEmail(email: string) {
+    const user = await this.userRepository.findOneBy({ email });
+    if (user)
+      throw new BadRequestException(
+        'Email already exists.Please try another email',
+      );
+    return { email: email };
+  }
 }

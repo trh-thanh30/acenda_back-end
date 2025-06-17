@@ -74,6 +74,7 @@ export class AuthController {
   changePassword(@Body() data: ChangePasswordDto) {
     return this.authService.changePassword(data);
   }
+
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response, @User() user: IUser) {
     return this.authService.logout(res, user);
