@@ -17,6 +17,7 @@ import { BookingModule } from './modules/booking/booking.module';
 import { TourModule } from './modules/tour/tour.module';
 import { TourBookingModule } from './modules/tour-booking/tour-booking.module';
 import { DifyChatModule } from './modules/dify-chat/dify-chat.module';
+import { BlogModule } from './modules/blog/blog.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { DifyChatModule } from './modules/dify-chat/dify-chat.module';
     TourModule,
     TourBookingModule,
     DifyChatModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [

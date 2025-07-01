@@ -1,4 +1,5 @@
 import { IsEmail, IsOptional } from 'class-validator';
+import { userGender } from '../entities/user.entity';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -19,4 +20,8 @@ export class UpdateUserDto {
   address: string;
   @IsOptional()
   avatar: string;
+  @IsOptional()
+  gender: userGender;
+  @IsOptional()
+  date_of_birth: Date;
 }

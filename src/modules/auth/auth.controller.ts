@@ -53,7 +53,7 @@ export class AuthController {
   }
 
   @Public()
-  @Get('refresh')
+  @Post('refresh')
   refreshToken(
     @Req() request: Request,
     @Res({ passthrough: true }) res: Response,

@@ -43,6 +43,7 @@ export class UploadController {
       throw new BadRequestException(error.message || 'Failed to upload avatar');
     }
   }
+
   @Post('multi-with-keys')
   @UseInterceptors(FilesInterceptor('files', 4))
   async uploadMultipleWithKeys(

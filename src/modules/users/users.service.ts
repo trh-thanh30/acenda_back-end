@@ -17,6 +17,7 @@ import { User, userStatus } from './entities/user.entity';
 import { hashPassword } from 'src/helpers/utils';
 import * as dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
+import { Response } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -94,10 +95,19 @@ export class UsersService {
     }
 
     await this.userRepository.update(id, updateUserDto);
-    return this.buildResponse(id, 'User updated successfully');
+    return {
+      id: id,
+      message: 'User updated successfully',
+      status: HttpStatus.OK,
+      data: {
+        first_name: updateUserDto.first_name,
+        last_name: updateUserDto.last_name,
+        email: updateUserDto.email,
+      },
+    };
   }
 
-  async remove(id: string) {
+  async remove(id: string, res: Response) {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) throw new BadRequestException('User not found');
 
@@ -105,23 +115,23 @@ export class UsersService {
       is_deleted: true,
       delete_at: new Date(),
     });
+    res.clearCookie('refresh_token');
     await this.userRepository.softDelete(user.id);
     return this.buildResponse(user.id, 'User deleted successfully');
   }
 
   async restoreUserSoft(id: string) {
-    const user = await this.userRepository.findOne({
+    await this.userRepository.findOne({
       where: { id },
       withDeleted: true,
     });
-    if (!user) throw new BadRequestException('User not found');
 
     await this.userRepository.restore(id);
     await this.userRepository.update(id, {
       is_deleted: false,
       delete_at: null,
     });
-    return this.buildResponse(user.id, 'User restored successfully');
+    return this.buildResponse(id, 'User restored successfully');
   }
 
   async register(registerDto: RegisterDto) {

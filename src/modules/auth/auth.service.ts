@@ -9,6 +9,8 @@ import { Response } from 'express';
 import { IUser } from '../users/users.interface';
 import { ConfigService } from '@nestjs/config';
 import { userStatus } from '../users/entities/user.entity';
+import { plainToInstance } from 'class-transformer';
+import { UserProfileDto } from './dto/user-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -58,6 +60,8 @@ export class AuthService {
       httpOnly: true,
       maxAge: Number(this.configService.get<string>('JWT_REFRESH_EXPIRE')),
       secure: false,
+      sameSite: 'lax',
+      path: '/',
     });
     // created access token
     const access_token = this.jwtService.sign(payload);
@@ -68,6 +72,7 @@ export class AuthService {
       email: user.email,
       gender: user.gender,
       role: user.role,
+      avatar: user.avatar,
     };
     return {
       access_token,
@@ -84,7 +89,10 @@ export class AuthService {
         status: HttpStatus.NOT_FOUND,
       };
     }
-    return profile;
+
+    return plainToInstance(UserProfileDto, profile, {
+      excludeExtraneousValues: true,
+    });
   }
   async processNewToken(refreshToken: string, res: Response) {
     try {
@@ -111,6 +119,8 @@ export class AuthService {
           httpOnly: true,
           maxAge: Number(this.configService.get<string>('JWT_REFRESH_EXPIRE')),
           secure: false,
+          sameSite: 'lax',
+          path: '/',
         });
         return {
           access_token: this.jwtService.sign(payload),
@@ -120,6 +130,7 @@ export class AuthService {
             last_name: user.last_name,
             email: user.email,
             role: user.role,
+            avatar: user.avatar,
           },
           message: 'Login successfully',
           status: HttpStatus.OK,
@@ -135,6 +146,7 @@ export class AuthService {
     // remove refresh token from user
     await this.userService.updateUserToken(user.id, '');
     // clear cookie
+
     res.clearCookie('refresh_token');
     return {
       message: 'Logout successfully',
