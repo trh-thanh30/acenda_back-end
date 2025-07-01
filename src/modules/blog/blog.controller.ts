@@ -13,6 +13,10 @@ import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { IUser } from '../users/users.interface';
+import { Public, User } from 'src/decorator/customize';
+import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { Blog } from './entities/blog.entity';
 
 @Controller('blog')
 export class BlogController {
@@ -23,18 +27,21 @@ export class BlogController {
   create(
     @Body() createBlogDto: CreateBlogDto,
     @UploadedFile() file: Express.Multer.File,
+    @User() user: IUser,
   ) {
-    return this.blogService.create(createBlogDto, file);
+    return this.blogService.create(createBlogDto, file, user);
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.blogService.findAll();
+  findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Blog>> {
+    return this.blogService.findAll(query);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.blogService.findOne(+id);
+    return this.blogService.findOne(id);
   }
 
   @Patch(':id')
@@ -43,7 +50,7 @@ export class BlogController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.blogService.remove(+id);
+  removeSoft(@Param('id') id: string, @User() user: IUser) {
+    return this.blogService.removeSoft(id, user);
   }
 }
