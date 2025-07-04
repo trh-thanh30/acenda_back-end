@@ -18,6 +18,7 @@ import { TourModule } from './modules/tour/tour.module';
 import { TourBookingModule } from './modules/tour-booking/tour-booking.module';
 import { DifyChatModule } from './modules/dify-chat/dify-chat.module';
 import { BlogModule } from './modules/blog/blog.module';
+import { RolesGuard } from './shared/guards/roles.guard';
 
 @Module({
   imports: [
@@ -45,6 +46,10 @@ import { BlogModule } from './modules/blog/blog.module';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard, // Global guard for JWT authentication
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // Global guard for role-based authorization
     },
   ],
 })

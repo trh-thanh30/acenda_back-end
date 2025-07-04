@@ -7,13 +7,7 @@ import { Blog } from './entities/blog.entity';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ConfigService } from '@nestjs/config';
 import { IUser } from '../users/users.interface';
-import {
-  FilterOperator,
-  FilterSuffix,
-  paginate,
-  Paginated,
-  PaginateQuery,
-} from 'nestjs-paginate';
+import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class BlogService {
@@ -95,8 +89,16 @@ export class BlogService {
     return blog;
   }
 
-  update(id: number, updateBlogDto: UpdateBlogDto) {
-    return `This action updates a #${id} blog`;
+  async update(id: string, updateBlogDto: UpdateBlogDto) {
+    const blog = await this.blogRepository.findOneBy({ id });
+    if (!blog) {
+      throw new BadRequestException('Blog not found');
+    }
+    await this.blogRepository.update(blog.id, updateBlogDto);
+    return {
+      id: blog.id,
+      message: 'Blog updated successfully',
+    };
   }
 
   async removeSoft(id: string, user: IUser) {

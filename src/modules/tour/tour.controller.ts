@@ -13,16 +13,18 @@ import { TourService } from './tour.service';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { User } from 'src/decorator/customize';
+import { Public, Roles, User } from 'src/decorator/customize';
 import { IUser } from '../users/users.interface';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Tour } from './entities/tour.entity';
+import { userRole } from '../users/entities/user.entity';
 
 @Controller('tour')
 export class TourController {
   constructor(private readonly tourService: TourService) {}
 
   @Post()
+  @Roles([userRole.ADMIN, userRole.ADMIN_TOUR])
   @UseInterceptors(FilesInterceptor('images', 10))
   create(
     @Body() createTourDto: CreateTourDto,
@@ -32,17 +34,20 @@ export class TourController {
     return this.tourService.create(createTourDto, user, files);
   }
 
+  @Public()
   @Get()
   findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Tour>> {
     return this.tourService.findAll(query);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tourService.findOne(id);
   }
 
   @Patch(':id')
+  @Roles([userRole.ADMIN, userRole.ADMIN_TOUR])
   @UseInterceptors(FilesInterceptor('images', 10))
   update(
     @Param('id') id: string,
@@ -62,6 +67,7 @@ export class TourController {
   }
 
   @Delete(':id')
+  @Roles([userRole.ADMIN, userRole.ADMIN_TOUR])
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.tourService.remove(id, user);
   }

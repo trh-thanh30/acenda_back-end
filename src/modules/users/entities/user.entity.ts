@@ -14,6 +14,7 @@ import { uuidv7 } from 'uuidv7';
 export enum userRole {
   ADMIN = 'admin',
   ADMIN_HOTEL = 'admin_hotel',
+  ADMIN_TOUR = 'admin_tour',
   CUSTOMER = 'customer',
 }
 export enum userGender {

@@ -25,6 +25,7 @@ export class HotelService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly configService: ConfigService,
   ) {}
+
   async create(
     createHotelDto: CreateHotelDto,
     user: IUser,

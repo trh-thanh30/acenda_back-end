@@ -12,24 +12,26 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { User } from './entities/user.entity';
-import { Public } from 'src/decorator/customize';
+import { User, userRole } from './entities/user.entity';
+import { Public, Roles } from 'src/decorator/customize';
 import { Response } from 'express';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
+  @Roles([userRole.ADMIN])
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
+  @Roles([userRole.ADMIN])
   @Get()
   findAll(@Paginate() query: PaginateQuery): Promise<Paginated<User>> {
     return this.usersService.findAll(query);
   }
 
+  @Roles([userRole.ADMIN])
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
@@ -51,7 +53,7 @@ export class UsersController {
     return this.usersService.alreadyEmail(email);
   }
 
-  @Public()
+  @Roles([userRole.ADMIN])
   @Patch('/restore/:id')
   restore(@Param('id') id: string) {
     return this.usersService.restoreUserSoft(id);
