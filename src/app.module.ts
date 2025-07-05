@@ -19,6 +19,7 @@ import { TourBookingModule } from './modules/tour-booking/tour-booking.module';
 import { DifyChatModule } from './modules/dify-chat/dify-chat.module';
 import { BlogModule } from './modules/blog/blog.module';
 import { RolesGuard } from './shared/guards/roles.guard';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { RolesGuard } from './shared/guards/roles.guard';
     TourBookingModule,
     DifyChatModule,
     BlogModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [

@@ -8,6 +8,7 @@ import { Review } from 'src/modules/review/entities/review.entity';
 import { Room } from 'src/modules/room/entities/room.entity';
 import { Tour } from 'src/modules/tour/entities/tour.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { Wishlist } from 'src/wishlist/entities/wishlist.entity';
 
 export const DatabaseConfig = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
@@ -18,7 +19,17 @@ export const DatabaseConfig = TypeOrmModule.forRootAsync({
     username: configService.get<string>('USERNAME_DB'),
     password: configService.get<string>('PASSWORD_DB'),
     database: configService.get<string>('DATABASE_NAME_DB'),
-    entities: [User, Address, Hotel, Room, Review, Booking, Tour, Blog],
+    entities: [
+      User,
+      Address,
+      Hotel,
+      Room,
+      Review,
+      Booking,
+      Tour,
+      Blog,
+      Wishlist,
+    ],
     synchronize: true,
   }),
   inject: [ConfigService],

@@ -1,6 +1,7 @@
 import { Booking } from 'src/modules/booking/entities/booking.entity';
 import { Hotel } from 'src/modules/hotel/entities/hotel.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
+import { Wishlist } from 'src/wishlist/entities/wishlist.entity';
 import {
   BeforeInsert,
   Column,
@@ -91,4 +92,6 @@ export class User {
   reviews: Review[];
   @OneToMany(() => Booking, (booking) => booking.booking_by)
   bookings: Booking[];
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
+  wishlists: Wishlist[];
 }
