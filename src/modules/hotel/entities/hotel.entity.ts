@@ -25,7 +25,7 @@ export class Hotel {
   }
   @Column({ unique: true })
   name: string;
-  @Column()
+  @Column({ type: 'text' })
   description: string;
   @Column('simple-array', { nullable: true })
   amenities: string[];

@@ -1,3 +1,4 @@
+import { Hotel } from 'src/modules/hotel/entities/hotel.entity';
 import { Tour } from 'src/modules/tour/entities/tour.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
@@ -21,6 +22,8 @@ export class Wishlist {
   user: User;
   @ManyToOne(() => Tour)
   tour: Tour;
+  @ManyToOne(() => Hotel)
+  hotel: Hotel;
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
