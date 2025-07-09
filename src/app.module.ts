@@ -20,6 +20,7 @@ import { DifyChatModule } from './modules/dify-chat/dify-chat.module';
 import { BlogModule } from './modules/blog/blog.module';
 import { RolesGuard } from './shared/guards/roles.guard';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     DifyChatModule,
     BlogModule,
     WishlistModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [

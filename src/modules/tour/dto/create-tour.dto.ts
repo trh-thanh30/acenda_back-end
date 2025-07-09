@@ -62,6 +62,13 @@ export class CreateTourDto {
   availableSlots: number;
 
   @IsOptional()
+  departure_schedule: string;
+  @IsOptional()
+  surcharge: string;
+  @IsOptional()
+  note: string;
+
+  @IsOptional()
   @IsArray({ message: 'Images must be an array' })
   images: string[];
 }

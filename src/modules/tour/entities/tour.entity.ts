@@ -53,6 +53,15 @@ export class Tour {
   @Column()
   address: string;
 
+  @Column({ nullable: true, type: 'text' })
+  departure_schedule: string;
+
+  @Column({ nullable: true, type: 'text' })
+  surcharge: string;
+
+  @Column({ nullable: true, type: 'text' })
+  note: string;
+
   @Column({ nullable: true })
   thumbnail: string;
 

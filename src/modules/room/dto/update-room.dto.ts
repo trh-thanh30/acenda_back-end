@@ -15,4 +15,5 @@ export class UpdateRoomDto {
   amenities?: string[];
   @IsOptional()
   images?: string[];
+  
 }
